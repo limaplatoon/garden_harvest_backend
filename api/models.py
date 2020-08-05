@@ -58,7 +58,7 @@ class Slot(models.Model):
         return harvest_ranges
 
 
-class Plant_Zone(models.Model):
+class PlantZone(models.Model):
     plant = models.ForeignKey(
         Plant, on_delete=models.CASCADE, related_name='zones')
     zone = models.ForeignKey(
@@ -83,9 +83,9 @@ class Plant_Zone(models.Model):
         unique_together = ['plant', 'zone']
 
 
-class Plant_slot(models.Model):
+class PlantSlot(models.Model):
     plant_zone = models.ForeignKey(
-        Plant_Zone, on_delete=models.CASCADE, related_name="slots")
+        PlantZone, on_delete=models.CASCADE, related_name="slots")
     slot = models.ForeignKey(
         Slot, on_delete=models.CASCADE, related_name="plant")
     created_at = models.DateTimeField(default=timezone.now)
@@ -99,4 +99,4 @@ class Plant_slot(models.Model):
         return f"plant: {self.plant_zone.plant.name}-{self.slot.location_description}-{self.date_planted}"
 
     class Meta:
-        unique_together = ['plant_zone', 'slot', 'date_planted']
+        unique_together = ['plant_zone', 'slot', 'created_at']
