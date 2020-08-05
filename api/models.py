@@ -3,11 +3,10 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-
 class Zone(models.Model):
     zone = models.CharField(max_length=3, primary_key=True)
     min_temp = models.IntegerField()
-
+​
     def all_plants_in_a_zone(self):
         return list(self.plants.all())
 
@@ -33,9 +32,8 @@ class Plant(models.Model):
     def __str__(self):
         return f'{self.common_name}'
 
-
-class CustomUser(AbstractUser):
-    zip_code = models.CharField(max_length=100, blank=False)
+class User(AbstractUser):
+    zip_code = models.CharField(max_length=5, blank=False)
     zone = models.ForeignKey(Zone, related_name="users",
                              on_delete=models.CASCADE)
 
@@ -57,24 +55,13 @@ class Slot(models.Model):
             harvest_ranges.append((plant_name, harvest_min, harvest_max))
         return harvest_ranges
 
-
+      
 class PlantZone(models.Model):
     plant = models.ForeignKey(
         Plant, on_delete=models.CASCADE, related_name='zones')
     zone = models.ForeignKey(
         Zone, on_delete=models.CASCADE, related_name='plants')
-    january = models.CharField(max_length=3, default='')
-    february = models.CharField(max_length=3, default='')
-    march = models.CharField(max_length=3, default='')
-    april = models.CharField(max_length=3, default='')
-    may = models.CharField(max_length=3, default='')
-    june = models.CharField(max_length=3, default='')
-    july = models.CharField(max_length=3, default='')
-    august = models.CharField(max_length=3, default='')
-    september = models.CharField(max_length=3, default='')
-    october = models.CharField(max_length=3, default='')
-    november = models.CharField(max_length=3, default='')
-    december = models.CharField(max_length=3, default='')
+    calendar = models.CharField(max_length=23, default=','*11)
 
     def __str__(self):
         return f"plant: {self.plant.name} - zone: {self.zone.name}"
@@ -82,16 +69,17 @@ class PlantZone(models.Model):
     class Meta:
         unique_together = ['plant', 'zone']
 
-
+        
 class PlantSlot(models.Model):
     plant_zone = models.ForeignKey(
         PlantZone, on_delete=models.CASCADE, related_name="slots")
     slot = models.ForeignKey(
         Slot, on_delete=models.CASCADE, related_name="plant")
-    created_at = models.DateTimeField(default=timezone.now)
+
+    
     date_seeded = models.DateField(blank=True, null=True, default=None)
-    date_transplanted = models.DateField(blank=True, null=True, default=None)
     date_planted = models.DateField(blank=True, null=True)
+    date_harvested = models.DateField(blank=True, null=True, default=None)
     harvest_date_min = models.DateField(blank=True, null=True)
     harvest_date_max = models.DateField(blank=True, null=True)
 
@@ -100,3 +88,4 @@ class PlantSlot(models.Model):
 
     class Meta:
         unique_together = ['plant_zone', 'slot', 'created_at']
+
