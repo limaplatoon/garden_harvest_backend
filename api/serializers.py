@@ -1,6 +1,6 @@
 from builtins import object
 from rest_framework import serializers
-from .models import CustomUser, Slot, Zone ,Plant ,Plant_Zone, Plant_slot, PlantSlotActivity
+from .models import CustomUser, Slot, Zone ,Plant ,PlantZone, PlantSlot, PlantSlotActivity
 
 class PlantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,7 +30,7 @@ class ZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Zone
         fields = [
-            'name',
+            'zone',
             'min_temp'
         ]
 
@@ -42,41 +42,25 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'zone'
         ]
 
-class Plant_ZoneSerializer(serializers.ModelSerializer):
+class PlantZoneSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Plant_Zone
+        model = PlantZone
         fields = [
             'plant',    
             'zone',
-            'january',
-            'february',
-            'march',
-            'april',
-            'may',
-            'june',
-            'july',
-            'august',
-            'september',
-            'october',
-            'november',
-            'december'
+            'calendar',
         ]
 
-class Plant_slotSerializer(serializers.ModelSerializer):
+class PlantSlotSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Plant_slot
+        model = PlantSlot
         fields = [
             'plant_zone',
             'slot',
+            'date_seeded',
             'date_planted',
+            'date_harvested',
             'harvest_date_min',
-            'harvest_date_max'
+            'harvest_date_max',
         ]
 
-class PlantSlotActivity(serializers.ModelSerializer):
-    class Meta:
-        model = PlantSlotActivity
-        fields = [
-            'plant_slot',
-            'activity'
-        ]
