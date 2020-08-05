@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 
 class Zone(models.Model):
@@ -87,11 +88,12 @@ class Plant_slot(models.Model):
         Plant_Zone, on_delete=models.CASCADE, related_name="slots")
     slot = models.ForeignKey(
         Slot, on_delete=models.CASCADE, related_name="plant")
+    created_at = models.DateTimeField(default=timezone.now)
     date_seeded = models.DateField(blank=True, null=True, default=None)
     date_transplanted = models.DateField(blank=True, null=True, default=None)
     date_planted = models.DateField(blank=True, null=True)
-    harvest_days_min = models.IntegerField(default=1)
-    harvest_days_max = models.IntegerField(default=1)
+    harvest_date_min = models.DateField(blank=True, null=True)
+    harvest_date_max = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f"plant: {self.plant_zone.plant.name}-{self.slot.location_description}-{self.date_planted}"
