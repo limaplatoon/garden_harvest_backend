@@ -94,6 +94,8 @@ class PlantSlot(models.Model):
     date_planted = models.DateField(blank=True, null=True)
     harvest_date_min = models.DateField(blank=True, null=True)
     harvest_date_max = models.DateField(blank=True, null=True)
+    requires_seeding = models.BooleanField(default=False)
+    harvested = models.BooleanField(default=False)
 
     def __str__(self):
         return f"plant: {self.plant_zone.plant.name}-{self.slot.location_description}-{self.date_planted}"
