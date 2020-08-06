@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             name='ZipZone',
             fields=[
                 ('zip_code', models.CharField(max_length=5, primary_key=True, serialize=False)),
-                ('zone', models.CharField(max_length=2)),
+                ('zone', models.CharField(max_length=3)),
             ],
         ),
         migrations.CreateModel(
