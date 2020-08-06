@@ -23,4 +23,4 @@ class ListUserPlants(generics.ListAPIView):
     def get(self, request, user_id):
         user = get_object_or_404(CustomUser, id=user_id)
         user_plants = 
-# Create your views here.
+

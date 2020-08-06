@@ -1,5 +1,6 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+from users.models import User
 
 
 class Zone(models.Model):
@@ -30,12 +31,6 @@ class Plant(models.Model):
 
     def __str__(self):
         return f'{self.common_name}'
-
-
-class User(AbstractUser):
-    zip_code = models.CharField(max_length=5, blank=False)
-    zone = models.ForeignKey(Zone, related_name="users",
-                             on_delete=models.CASCADE)
 
 
 class Slot(models.Model):
