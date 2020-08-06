@@ -59,7 +59,7 @@ class PlantZone(models.Model):
     calendar = models.CharField(max_length=23, default=',' * 11)
 
     def __str__(self):
-        return f"plant: {self.plant.name} - zone: {self.zone.name}"
+        return f"{self.plant} ({self.zone.zone})"
 
     class Meta:
         unique_together = ['plant', 'zone']
