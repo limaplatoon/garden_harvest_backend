@@ -1,6 +1,6 @@
 from builtins import object
 from rest_framework import serializers
-from .models import ZipZone, Slot, Zone ,Plant ,PlantZone, PlantSlot
+from .models import Slot, Zone ,Plant ,PlantZone, PlantSlot
 
 class PlantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,13 +14,6 @@ class PlantSerializer(serializers.ModelSerializer):
             'harvest_max',
             'companions',
             'description'
-        ]
-
-class PlantNameOnlySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Plant
-        fields = [
-            'common_name',
         ]
 
 class SlotSerializer(serializers.ModelSerializer):
@@ -41,13 +34,15 @@ class ZoneSerializer(serializers.ModelSerializer):
             'min_temp'
         ]
 
-class ZipZoneSerializer(serializers.ModelSerializer):
+class PlantNameOnlySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ZipZone
+        model = Plant
         fields = [
-            'zip_code',
-            'zone'
+            'pk',
+            'common_name',
+            "scientific_name"
         ]
+
 
 class PlantZoneSerializer(serializers.ModelSerializer):
     
@@ -59,6 +54,15 @@ class PlantZoneSerializer(serializers.ModelSerializer):
             'plant',    
             'zone',
             'calendar',
+        ]
+
+class SuggestedPlantSerializer(serializers.ModelSerializer):
+    plant = PlantNameOnlySerializer()
+
+    class Meta:
+        model = PlantZone
+        fields = [
+            'plant',
         ]
 
 class PlantSlotSerializer(serializers.ModelSerializer):
