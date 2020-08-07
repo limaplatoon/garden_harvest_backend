@@ -36,3 +36,7 @@ class ListAvailablePlants(generics.ListAPIView):
 
 
 # Create your views here.
+    def get(self, request, user_id):
+        user = get_object_or_404(CustomUser, id=user_id)
+        user_plants = 
+
