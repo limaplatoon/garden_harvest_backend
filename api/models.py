@@ -18,7 +18,7 @@ class ZipZone(models.Model):
     zone = models.CharField(max_length=2)
 
     def __str__(self):
-        return f'{self.zipcode} (zone {self.zone})'
+        return f'{self.zip_code} (zone {self.zone})'
 
 
 class Plant(models.Model):
