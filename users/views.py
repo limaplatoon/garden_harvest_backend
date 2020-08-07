@@ -3,15 +3,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.models import Zone
 from users.models import ZipZone
 from users.serializers import UserSerializer
 
 
 def get_zone_from_zip(zip_code: str) -> dict:
     try:
-        zone = ZipZone.objects.get(zip_code=zip_code)
-        extended_data = dict(zone=zone)
-    except ZipZone.DoesNotExist:
+        zipzone = ZipZone.objects.get(zip_code=zip_code)
+        zone = Zone.objects.get(zone=zipzone.zone)
+        extended_data = dict(zone=zone.pk)
+    except Zone.DoesNotExist:
         extended_data = {}
     return extended_data
 
