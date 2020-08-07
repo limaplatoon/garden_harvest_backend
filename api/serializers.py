@@ -56,7 +56,7 @@ class PlantZoneSerializer(serializers.ModelSerializer):
             'calendar',
         ]
 
-class SuggestedPlantSerializer(serializers.ModelSerializer):
+class FilteredPlantSerializer(serializers.ModelSerializer):
     plant = PlantNameOnlySerializer()
 
     class Meta:
@@ -66,6 +66,9 @@ class SuggestedPlantSerializer(serializers.ModelSerializer):
         ]
 
 class PlantSlotSerializer(serializers.ModelSerializer):
+
+    plant = PlantNameOnlySerializer()
+
     class Meta:
         model = PlantSlot
         fields = [
