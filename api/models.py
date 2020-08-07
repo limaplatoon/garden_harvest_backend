@@ -1,6 +1,9 @@
 from django.db import models
+from django.utils import timezone
+from django.contrib.auth import get_user_model
 
-from users.models import User
+# NOTE: this retrieves settings.py -> AUTH_USER_MODEL
+User = get_user_model()
 
 
 class Zone(models.Model):
@@ -13,7 +16,7 @@ class Zone(models.Model):
 
 class ZipZone(models.Model):
     zip_code = models.CharField(max_length=5, primary_key=True)
-    zone = models.CharField(max_length=3, unique=True)
+    zone = models.CharField(max_length=3)
 
     def __str__(self):
         return f'{self.zip_code} (zone {self.zone})'
@@ -71,16 +74,14 @@ class PlantSlot(models.Model):
     slot = models.ForeignKey(
         Slot, on_delete=models.CASCADE, related_name="plant")
 
+    created_at = models.DateField(default=timezone.now)
+
     date_seeded = models.DateField(blank=True, null=True, default=None)
     date_planted = models.DateField(blank=True, null=True)
     date_harvested = models.DateField(blank=True, null=True, default=None)
+
     harvest_date_min = models.DateField(blank=True, null=True)
     harvest_date_max = models.DateField(blank=True, null=True)
 
     def __str__(self):
-        return f"plant: {self.plant_zone.plant.common_name}" \
-               f"-{self.slot.location_description}" \
-               f"-{self.date_planted}"
-
-    class Meta:
-        unique_together = ['plant_zone', 'slot', 'created_at']
+        return f"{self.plant_zone} - Slot[{self.slot.pk} {self.slot.name}]"

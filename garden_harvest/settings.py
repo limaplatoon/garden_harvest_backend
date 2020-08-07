@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'rest_framework.apps.RestFrameworkConfig',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'users.apps.AuthConfig',
-    'api.apps.ApiConfig'
+    'api',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -87,7 +87,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'api.User'
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

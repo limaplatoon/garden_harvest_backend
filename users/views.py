@@ -4,6 +4,14 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from users.serializers import UserSerializer
+from users.models import ZipZone
+
+
+def get_zone_from_zip(zip_code: str) -> dict:
+    extended_data = {}
+    zone = ZipZone.objects.get(zip_code=zip_code)
+
+    return extended_data
 
 
 class UserCreate(APIView):
@@ -11,6 +19,8 @@ class UserCreate(APIView):
     authentication_classes = ()
 
     def post(self, request, format='json'):
+        extended_data = get_zone_from_zip(request.data['zip_code'])
+        request.data.update(extended_data)
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()

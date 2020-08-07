@@ -4,15 +4,18 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
     username = serializers.CharField(required=True)
-    password = serializers.CharField(min_length=8, write_only=True)
-    email = serializers.EmailField(required=True)
-    zip_code = serializers.CharField(min_length=5, max_length=5)
+    password = serializers.CharField(required=True, min_length=1, write_only=True)
+    zip_code = serializers.CharField(required=True, min_length=5, max_length=5)
+    zone = serializers.CharField(required=True, min_length=2, max_length=3)
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'zip_code',
-                  'state', 'first', 'lon', 'formatted_address')
+        fields = ('first_name', 'last_name', 'email',
+                  'username', 'password', 'zip_code', 'zone')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

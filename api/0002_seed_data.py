@@ -24,7 +24,7 @@ def seed_zone_data(apps):
 def seed_zipzone_data(apps):
     print("\033[36m   - begin seed of zipzones \033[m")
     
-    ZipZone = apps.get_model('api', 'ZipZone')
+    ZipZone = apps.get_model('users', 'ZipZone')
 
     filepath = os.path.join(DATA_PATH, 'zip_zones.json')
     with open(filepath, 'r', encoding='utf-8') as json_file:
