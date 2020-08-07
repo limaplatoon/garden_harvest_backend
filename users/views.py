@@ -3,14 +3,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from users.serializers import UserSerializer
 from users.models import ZipZone
+from users.serializers import UserSerializer
 
 
 def get_zone_from_zip(zip_code: str) -> dict:
-    extended_data = {}
-    zone = ZipZone.objects.get(zip_code=zip_code)
-
+    try:
+        zone = ZipZone.objects.get(zip_code=zip_code)
+        extended_data = dict(zone=zone)
+    except ZipZone.DoesNotExist:
+        extended_data = {}
     return extended_data
 
 
@@ -52,5 +54,3 @@ class HelloView(APIView):
     def get(self, request):
         return Response(data={"hello": f"Hi, {self.request.user.username}!"},
                         status=status.HTTP_200_OK)
-
-

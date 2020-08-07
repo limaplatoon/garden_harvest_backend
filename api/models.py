@@ -14,14 +14,6 @@ class Zone(models.Model):
         return list(self.plants.all())
 
 
-class ZipZone(models.Model):
-    zip_code = models.CharField(max_length=5, primary_key=True)
-    zone = models.CharField(max_length=3)
-
-    def __str__(self):
-        return f'{self.zip_code} (zone {self.zone})'
-
-
 class Plant(models.Model):
     common_name = models.CharField(max_length=255)
     scientific_name = models.CharField(max_length=255)
