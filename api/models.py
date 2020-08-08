@@ -9,16 +9,9 @@ User = get_user_model()
 class Zone(models.Model):
     zone = models.CharField(max_length=3, primary_key=True)
     min_temp = models.IntegerField()
+
     def all_plants_in_a_zone(self):
         return list(self.plants.all())
-
-
-class ZipZone(models.Model):
-    zip_code = models.CharField(max_length=5, primary_key=True)
-    zone = models.CharField(max_length=2)
-
-    def __str__(self):
-        return f'{self.zipcode} (zone {self.zone})'
 
 
 class Plant(models.Model):
@@ -52,13 +45,13 @@ class Slot(models.Model):
             harvest_ranges.append((plant_name, harvest_min, harvest_max))
         return harvest_ranges
 
-      
+
 class PlantZone(models.Model):
     plant = models.ForeignKey(
         Plant, on_delete=models.CASCADE, related_name='zones')
     zone = models.ForeignKey(
         Zone, on_delete=models.CASCADE, related_name='plants')
-    calendar = models.CharField(max_length=23, default=','*11)
+    calendar = models.CharField(max_length=23, default=',' * 11)
 
     def __str__(self):
         return f"{self.plant} ({self.zone.zone})"
@@ -72,7 +65,7 @@ class PlantSlot(models.Model):
         PlantZone, on_delete=models.CASCADE, related_name="slots")
     slot = models.ForeignKey(
         Slot, on_delete=models.CASCADE, related_name="plant")
-    
+
     created_at = models.DateField(default=timezone.now)
 
     date_seeded = models.DateField(blank=True, null=True, default=None)
