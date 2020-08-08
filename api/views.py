@@ -24,7 +24,7 @@ class PlantDetail(generics.RetrieveAPIView):
     serializer_class = serializers.PlantSlotSerializer
 
 
-class UserPlants(generics.ListAPIView):
+class UserPlants(generics.ListCreateAPIView):
     serializer_class = serializers.FilteredPlantSerializer
 
     def get(self, request):
@@ -34,4 +34,13 @@ class UserPlants(generics.ListAPIView):
                   for plant_slot in PlantSlot.objects.filter(slot__user=user)]
         serializer = self.get_serializer(plants, many=True)
         return Response(serializer.data)
+
+
+class AddPlantToGarden(generics.ListCreateAPIView):
+    queryset = Plant.objects.all()
+    serializer_class = serializers.FilteredPlantSerializer
+
+    def post(self, request):
+        user = User.objects.get(pk=3)
         
+
