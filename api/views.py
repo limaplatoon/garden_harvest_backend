@@ -21,7 +21,7 @@ class ListAvailablePlants(generics.ListAPIView):
 
 class PlantDetail(generics.RetrieveAPIView):
     queryset = Plant.objects.all()
-    serializer_class = serializers.PlantSlotSerializer
+    serializer_class = serializers.PlantSerializer
 
 
 class UserPlants(generics.ListCreateAPIView):
