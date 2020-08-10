@@ -1,7 +1,7 @@
 from .models import Zone, Plant, Slot, PlantZone, PlantSlot
 from api import serializers
 from api.utils.seed_planner import schedule
-from api.utils.queries import retrieve_a_users_plants,plants_that_can_be_seeded_this_month, plants_that_can_be_planted_this_month
+from api.utils.queries import retrieve_a_users_plants,plants_that_can_be_seeded_this_month, plants_that_can_be_planted_this_month,current_status_of_all_user_plants
 from rest_framework import generics
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
@@ -139,22 +139,19 @@ def plant_something_new_this_month(request,):
     something_new_this_month = {'can_be_seeded':serial_seeded, 'can_be_planted':serial_planted}
     return Response(something_new_this_month)
 
+class PlantSlotStatus(generics.ListAPIView):
+    queryset = PlantSlot.objects.all()
+    serializer_class = serializers.PlantSlotSerializer
 
-
-
-
-
-
-
-'''
-def determine_possible_schedule(request, plant_slot_id):
-    plant_slot_object = get_object_or_404(PlantSlot, pk=plant_slot_id)
-    possible_options = schedule(plant_slot_object.plant_zone, plant_slot_object.slot.user.id)
-    final_result = (plant_slot_id, possible_options)
-    serialized_data = MakeANewSerializer(final_result)
-    return JsonResponse(data=serialized_data, status=200)
-#retrieve plantSlot_Id abbreviated as PS from request
-        #call seedplaner with (PS.plant_zone, PS.slot.user.id)
-        #recieve sorted list by earliest planting time [(date, slot_object)] from above call to seedplaner
-        #return options as follows (current plant_slot_id, sorted_list)
-'''
+    def get(self, request):
+        # This will change once auth login is completed
+        user = User.objects.get(pk=1)
+        to_be_scheduled, to_be_seeded, to_be_transplanted, to_be_planted, to_be_harvested, harvested_plants = current_status_of_all_user_plants(user.id)
+        scheduled = self.get_serializer(to_be_scheduled, many=True).data
+        seeded = self.get_serializer(to_be_seeded, many=True).data
+        transplanted = self.get_serializer(to_be_transplanted, many=True).data
+        planted = self.get_serializer(to_be_planted, many=True).data
+        harvested = self.get_serializer(to_be_harvested, many=True).data
+        history = self.get_serializer(harvested_plants, many=True).data
+        result = {'to_be_scheduled': scheduled, 'to_be_seeded': seeded, 'to_be_transplanted': transplanted, 'to_be_planted': planted, 'to_be_harvested': harvested, 'harvested_plants': history}
+        return Response(result)

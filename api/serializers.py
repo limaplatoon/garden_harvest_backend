@@ -16,7 +16,7 @@ class PlantSerializer(serializers.ModelSerializer):
 class SlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
-        fields = ['pk', 'color', 'location_description'
+        fields = ['pk', 'color', 'location_description',
                   'name', 'user'
                   ]
 

@@ -73,13 +73,10 @@ def placement(plant_obj, existing_plant_schedule):
 
 def schedule(plant_obj, user_id):
     slots = list(Slot.objects.filter(user__id=user_id))
-    print(slots)
     earliest_slot_times = []
     for slot in slots:
         existing_plant_schedule = list(PlantSlot.objects.filter(slot__id=slot.id).exclude(date_harvested__isnull=False).order_by('created_at'))
         result = placement(plant_obj, existing_plant_schedule)
         earliest_slot_times.append((result, slot.id))
     proposals = sorted(earliest_slot_times, key=lambda x: x[0])
-    print(earliest_slot_times)
-    print(proposals)
     return proposals

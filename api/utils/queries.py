@@ -30,9 +30,11 @@ def plants_to_be_harvested(user_id):
 #alternative to running the above individually to get all statuses(yes it is a word)
 #it will return a tuple containing 5 lists
 def current_status_of_all_user_plants(user_id):
-    to_be_seeded, to_be_transplanted, to_be_planted, to_be_harvested, harvested_plants = [],[],[],[],[],
+    to_be_scheduled,to_be_seeded, to_be_transplanted, to_be_planted, to_be_harvested, harvested_plants = [],[],[],[],[],[]
     plants = retrieve_a_users_plants(user_id)
     for plant in plants:
+        if not plant.created_at:
+            to_be_scheduled.append(plant)
         if "S" in plant.plant_zone.calendar and not plant.date_seeded:
             to_be_seeded.append(plant)
         elif "S" in plant.plant_zone.calendar and not plant.date_planted:
@@ -43,7 +45,7 @@ def current_status_of_all_user_plants(user_id):
             to_be_harvested.append(plant)
         else:
             harvested_plants.append(plant)
-    return (to_be_seeded, to_be_transplanted, to_be_planted, to_be_harvested, harvested_plants)
+    return (to_be_scheduled, to_be_seeded, to_be_transplanted, to_be_planted, to_be_harvested, harvested_plants)
 
 #common helper function to determine which plants can be planted or seeded this month and that the user doesn't already have in there inventory
 def new_suggested_plant_activities_this_month(user_id, zone_object, p_or_s):
