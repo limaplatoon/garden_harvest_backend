@@ -1,15 +1,16 @@
 from django.urls import path, include
-from .views import ListAvailablePlants, PlantDetail, Calendar, UserPlants, AddPlant, UpdatePlant, DetermineSchedule
+from .views import DeletePlant, ListAvailablePlants, PlantDetail, Calendar, UserPlants, AddPlant, UpdatePlant, DetermineSchedule, book_this_plant
 
 urlpatterns = [
     path('suggested/', ListAvailablePlants.as_view()),
     path('plants/<int:pk>/', PlantDetail.as_view()),
     path('myplants/', UserPlants.as_view()),
     path('calendarEvents/', Calendar.as_view()),
-    path('scheduleplant/<int:pk>/', DetermineSchedule.as_view()),
     path('addplant/<int:user_id>/<int:plant_zone_id>/', AddPlant),
-    # path('updateplant/', UpdatePlant.as_view()),
-    # path('deleteplant/', )
+    path('scheduleplant/<int:pk>/', DetermineSchedule.as_view()),
+    path('scheduleaccepted/<int:plant_slot_id>/', book_this_plant),
+    path('updateplant/<int:plant_slot_id>/', UpdatePlant),
+    path('deleteplant/<int:plant_slot_id>/', DeletePlant),
 ]
 
     # path('addplant/', UserPlants.as_view()),

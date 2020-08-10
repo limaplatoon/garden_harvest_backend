@@ -1,3 +1,4 @@
+from .serializers import CalendarSerializer
 from .models import Zone, Plant, Slot, PlantZone, PlantSlot
 from rest_framework import generics
 from rest_framework.response import Response
@@ -8,6 +9,9 @@ from api.utils.queries import retrieve_a_users_plants
 from api.utils.seed_planner import schedule
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+import json
+
 
 User = get_user_model()
 
@@ -47,7 +51,7 @@ class Calendar(generics.ListAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = get_object_or_404(User, pk=4)
+        user = get_object_or_404(User, pk=1)
         events = list(retrieve_a_users_plants(user.id))
         serializer = self.get_serializer(events, many=True)
         return Response(serializer.data)
@@ -64,14 +68,47 @@ def AddPlant(request, user_id, plant_zone_id):  #item_create
         return JsonResponse(data=serialized_plant_slot, status=201)
     return HttpResponseNotAllowed(['POST'])
 
+@csrf_exempt
+def book_this_plant(request, plant_slot_id):
+    if request.method == 'POST':
+        event = get_object_or_404(PlantSlot,pk=plant_slot_id)
+        date = json.loads(request.POST)
+        #remove below when front end is working
+        date.accepted_date = timezone.now()
+        #remove above line when front end is working
+        event.created_at = date.accepted_date
+        event.save()
+        serialized_data = CalendarSerializer(event, many=False).data
+        return Response(serialized_data)
+    return HttpResponseNotAllowed(['POST'])
 
-class UpdatePlant(generics.RetrieveUpdateDestroyAPIView):
-    queryset = PlantSlot.objects.all()
-    serializer_class = serializers.FilteredPlantSerializer
+@csrf_exempt
+def UpdatePlant(request,plant_slot_id):
+    if request.method == 'POST':
+        event = get_object_or_404(PlantSlot, pk=plant_slot_id)
+        requires_seeding = ( 'S' in event.plant_zone.calendar )
+        if requires_seeding and not event.date_seeded:
+            event.date_seeded = timezone.now()
+        elif not event.date_planted:
+            event.date_planted = timezone.now()
+            min_date = (timezone.timedelta(days=(event.plant_zone.plant.harvest_min )))
+            max_date = (timezone.timedelta(days=(event.plant_zone.plant.harvest_max)))
+            event.harvest_date_min = event.date_planted + min_date
+            event.harvest_date_max = event.date_planted + max_date
+        else:
+            event.date_harvested = timezone.now()
+        event.save()
+        serialized_data = CalendarSerializer(event, many=False).data
+        return Response(serialized_data)
+    return HttpResponseNotAllowed(['POST'])
 
-    def delete(self, request):
-        user = User.objects.get(pk=3)
-
+@csrf_exempt
+def DeletePlant(request,plant_slot_id):
+    if request.method == 'POST':
+        event = get_object_or_404(PlantSlot, pk=plant_slot_id)
+        event.delete()
+        return JsonResponse(data={'status':'success'}, status=200)
+    return HttpResponseNotAllowed(['POST'])
 
 class DetermineSchedule(generics.RetrieveAPIView):
     queryset = PlantSlot.objects.all()
