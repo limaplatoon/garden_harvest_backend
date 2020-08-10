@@ -167,3 +167,8 @@ class WhatCanBeGrownInMyArea(generics.ListAPIView):
         possible_plants = all_plants_that_could_be_grown_in_this_zone(zone)
         serialized_list = self.get_serializer(possible_plants, many=True).data
         return Response(serialized_list)
+
+
+class Encyclopedia(generics.ListAPIView):
+    queryset = Plant.objects.all()
+    serializer_class = serializers.PlantSerializer
