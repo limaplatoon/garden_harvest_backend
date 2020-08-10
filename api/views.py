@@ -1,15 +1,16 @@
-from .serializers import CalendarSerializer
 from .models import Zone, Plant, Slot, PlantZone, PlantSlot
-from rest_framework import generics
-from rest_framework.response import Response
 from api import serializers
+from api.utils.seed_planner import schedule
+from api.utils.queries import retrieve_a_users_plants,plants_that_can_be_seeded_this_month, plants_that_can_be_planted_this_month
+from rest_framework import generics
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
+from rest_framework.response import Response
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.contrib.auth import get_user_model
-from api.utils.queries import retrieve_a_users_plants
-from api.utils.seed_planner import schedule
 from django.http import JsonResponse, HttpResponseNotAllowed
-from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 
@@ -17,7 +18,7 @@ User = get_user_model()
 
 class ListAvailablePlants(generics.ListAPIView):
     queryset = PlantZone.objects.all()
-    serializer_class = serializers.FilteredPlantSerializer
+    serializer_class = serializers.PlantZoneSerializer
 
     def get(self, request):
         # This will change once auth login is completed
@@ -34,7 +35,7 @@ class PlantDetail(generics.RetrieveAPIView):
 
 class UserPlants(generics.ListCreateAPIView):
     queryset = PlantSlot.objects.all()
-    serializer_class = serializers.FilteredPlantSerializer
+    serializer_class = serializers.PlantZoneSerializer
 
     def get(self, request):
         # This will change once auth login is completed
@@ -57,6 +58,8 @@ class Calendar(generics.ListAPIView):
         return Response(serializer.data)
 
 
+@api_view(('POST',))
+@renderer_classes((JSONRenderer, TemplateHTMLRenderer))
 @csrf_exempt
 def AddPlant(request, user_id, plant_zone_id):  #item_create
     if request.method == 'POST':
@@ -68,6 +71,9 @@ def AddPlant(request, user_id, plant_zone_id):  #item_create
         return JsonResponse(data=serialized_plant_slot, status=201)
     return HttpResponseNotAllowed(['POST'])
 
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer, TemplateHTMLRenderer))
 @csrf_exempt
 def book_this_plant(request, plant_slot_id):
     if request.method == 'POST':
@@ -78,10 +84,13 @@ def book_this_plant(request, plant_slot_id):
         #remove above line when front end is working
         event.created_at = date.accepted_date
         event.save()
-        serialized_data = CalendarSerializer(event, many=False).data
+        serialized_data = serializers.CalendarSerializer(event, many=False).data
         return Response(serialized_data)
     return HttpResponseNotAllowed(['POST'])
 
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer, TemplateHTMLRenderer))
 @csrf_exempt
 def UpdatePlant(request,plant_slot_id):
     if request.method == 'POST':
@@ -98,10 +107,13 @@ def UpdatePlant(request,plant_slot_id):
         else:
             event.date_harvested = timezone.now()
         event.save()
-        serialized_data = CalendarSerializer(event, many=False).data
+        serialized_data = serializers.CalendarSerializer(event, many=False).data
         return Response(serialized_data)
     return HttpResponseNotAllowed(['POST'])
 
+
+@api_view(('POST',))
+@renderer_classes((JSONRenderer, TemplateHTMLRenderer))
 @csrf_exempt
 def DeletePlant(request,plant_slot_id):
     if request.method == 'POST':
@@ -112,7 +124,20 @@ def DeletePlant(request,plant_slot_id):
 
 class DetermineSchedule(generics.RetrieveAPIView):
     queryset = PlantSlot.objects.all()
-    serializer_class = serializers.MakeANewSerializer
+    serializer_class = serializers.ScheduleSerializer
+
+@api_view(('GET',))
+@renderer_classes((JSONRenderer, TemplateHTMLRenderer))
+def plant_something_new_this_month(request,):
+    #edit next line once user auth is implemented
+    user = get_object_or_404(User, pk=2)
+    zone = Zone.objects.get(users__id=user.id)
+    can_be_seeded = plants_that_can_be_seeded_this_month(user.id, zone)
+    can_be_planted = plants_that_can_be_planted_this_month(user.id, zone)
+    serial_seeded = serializers.PlantZoneSerializer(can_be_seeded, many=True).data
+    serial_planted = serializers.PlantZoneSerializer(can_be_planted, many=True).data
+    something_new_this_month = {'can_be_seeded':serial_seeded, 'can_be_planted':serial_planted}
+    return Response(something_new_this_month)
 
 
 
