@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import DeletePlant, ListAvailablePlants, PlantDetail, Calendar, UserPlants, AddPlant, UpdatePlant, DetermineSchedule, book_this_plant, plant_something_new_this_month, PlantSlotStatus, WhatCanBeGrownInMyArea
+from .views import DeletePlant, ListAvailablePlants, PlantDetail, Calendar, UserPlants, AddPlant, UpdatePlant, DetermineSchedule, book_this_plant, plant_something_new_this_month, PlantSlotStatus, WhatCanBeGrownInMyArea, Encyclopedia
 
 urlpatterns = [
     path('suggested/', ListAvailablePlants.as_view()),
@@ -13,7 +13,8 @@ urlpatterns = [
     path('deleteplant/<int:plant_slot_id>/', DeletePlant),
     path('newActivities/', plant_something_new_this_month),
     path('allPlantStatus/', PlantSlotStatus.as_view()),
-    path('whatCanBeGrown/', WhatCanBeGrownInMyArea.as_view())
+    path('whatCanBeGrown/', WhatCanBeGrownInMyArea.as_view()),
+    path('encyclopedia/', Encyclopedia)
     ]
 
     # path('addplant/', UserPlants.as_view()),
