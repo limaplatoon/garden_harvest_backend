@@ -52,7 +52,7 @@ class Calendar(generics.ListAPIView):
     def get(self, request):
         # This will change once auth login is completed
         user = get_object_or_404(User, pk=1)
-        events = list(retrieve_a_users_plants(user.id))
+        events = list(retrieve_a_users_plants(user.id).filter(date_harvested__isnull=True))
         serializer = self.get_serializer(events, many=True)
         return Response(serializer.data)
 
