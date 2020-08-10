@@ -22,6 +22,7 @@ earliest proposed start date.
 '''
 
 from django.utils import timezone
+from datetime import datetime
 from api.models import PlantSlot, Slot
 
 
@@ -33,17 +34,17 @@ def depends_on_season(proposed_date, month, plant_obj, p_or_s):
     if adj_month > 0:
         planned_date = timezone.make_aware(timezone.datetime((year + (month + adj_month)//12),((month + adj_month)%12),1,0,0,0,0))
     else:
-        planned_date = proposed_date
+        planned_date = timezone.make_aware(datetime.combine(proposed_date,datetime.min.time()))
     return planned_date
 
 def retrieve_event_information(event):
     plant = event.plant_zone.plant
     calendar = event.plant_zone.calendar
     if event.date_planted:
-        start_date = event.created_at
-        end_date = event.harvest_date_max
+        start_date = timezone.make_aware(datetime.combine(event.created_at, datetime.min.time()))
+        end_date = timezone.make_aware(datetime.combine(event.harvest_date_max, datetime.min.time()))
     else:
-        start_date = event.created_at
+        start_date = timezone.make_aware(datetime.combine(event.created_at, datetime.min.time()))
         time_delta = (timezone.timedelta(days=(plant.harvest_max + (56 if "S" in calendar else 14))))
         end_date = start_date + time_delta
     return start_date, end_date
@@ -52,10 +53,10 @@ def placement(plant_obj, existing_plant_schedule):
     p_or_s = "S" if "S" in plant_obj.calendar else "P"
     proposed_date = timezone.now()
     month = (proposed_date.month - 1)
-    time_delta = timezone.timedelta(days=(plant_obj.harvest_max + (56 if "S" in p_or_s else 14)))
+    time_delta = timezone.timedelta(days=(plant_obj.plant.harvest_max + (56 if "S" in p_or_s else 14)))
     index = 0
     slot_not_found = True
-    while slot_not_found and (index <= len(existing_plant_schedule)):
+    while slot_not_found and (index < len(existing_plant_schedule)):
         event = existing_plant_schedule[index]
         scheduled_start, scheduled_end = retrieve_event_information(event)
         if proposed_date + time_delta <= scheduled_start:
@@ -76,6 +77,6 @@ def schedule(plant_obj, user_id):
     for slot in slots:
         existing_plant_schedule = list(PlantSlot.objects.filter(slot__id=slot.id).exclude(date_harvested__isnull=False).order_by('created_at'))
         result = placement(plant_obj, existing_plant_schedule)
-        earliest_slot_times.append((result, slot))
+        earliest_slot_times.append((result, slot.id))
     proposals = sorted(earliest_slot_times, key=lambda x: x[0])
     return proposals

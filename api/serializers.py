@@ -1,110 +1,57 @@
 from builtins import object
 from rest_framework import serializers
-from .models import Slot, Zone ,Plant ,PlantZone, PlantSlot
+from .models import Slot, Zone, Plant, PlantZone, PlantSlot
+from api.utils.seed_planner import schedule
+
 
 class PlantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plant
-        fields = [
-            'common_name',
-            'scientific_name',
-            'sowing',
-            'spacing',
-            'harvest_min',
-            'harvest_max',
-            'companions',
-            'description'
-        ]
+        fields = ['pk', 'common_name', 'companions',
+                  'description', 'harvest_max', 'harvest_min',
+                  'scientific_name', 'sowing', 'spacing'
+                  ]
+
 
 class SlotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Slot
-        fields = [
-            'user',
-            'name',
-            'color',
-            'location_description'
-        ]
+        fields = ['pk', 'color', 'location_description',
+                  'name', 'user'
+                  ]
+
 
 class ZoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Zone
-        fields = [
-            'zone',
-            'min_temp'
-        ]
-
-class PlantNameOnlySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Plant
-        fields = [
-            'pk',
-            'common_name',
-            "scientific_name"
-        ]
+        fields = ['min_temp', 'zone']
 
 
 class PlantZoneSerializer(serializers.ModelSerializer):
-    
-    plant = PlantNameOnlySerializer()
+    plant = PlantSerializer()
+    zone = ZoneSerializer()
 
     class Meta:
         model = PlantZone
-        fields = [
-            'plant',    
-            'zone',
-            'calendar',
-        ]
+        fields = ['pk', 'calendar', 'plant', 'zone']
 
-class FilteredPlantSerializer(serializers.ModelSerializer):
-    plant = PlantNameOnlySerializer()
-
-    class Meta:
-        model = PlantZone
-        fields = [
-            'plant',
-        ]
 
 class PlantSlotSerializer(serializers.ModelSerializer):
-
-    plant = PlantNameOnlySerializer()
+    plant_zone = PlantZoneSerializer()
+    slot = SlotSerializer()
 
     class Meta:
         model = PlantSlot
-        fields = [
-            'plant_zone',
-            'slot',
-            'date_seeded',
-            'date_planted',
-            'date_harvested',
-            'harvest_date_min',
-            'harvest_date_max',
-        ]
-
-
-class CalendarPlantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Plant
-        fields = ['id','common_name','harvest_max','harvest_min','sowing','spacing']
-
-
-class CalendarSlotSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Slot
-        fields = ['id', 'color','location_description','name']
-
-
-class CalendarZoneSerializer(serializers.ModelSerializer):
-    plant = CalendarPlantSerializer()
-
-    class Meta:
-        model = PlantZone
-        fields = ['calendar', 'plant']
+        fields = ['pk', 'created_at', 'date_harvested',
+                  'date_planted', 'date_seeded',
+                  'harvest_date_max', 'harvest_date_min',
+                  'plant_zone', 'slot'
+                  ]
 
 
 class CalendarSerializer(serializers.ModelSerializer):
-    plant_zone = CalendarZoneSerializer()
-    slot = CalendarSlotSerializer()
+    plant_zone = PlantZoneSerializer()
+    slot = SlotSerializer()
     planned_duration = serializers.SerializerMethodField()
     requires_seeding = serializers.SerializerMethodField()
 
@@ -118,5 +65,38 @@ class CalendarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PlantSlot
-        fields = ['id','created_at', 'date_planted', 'date_seeded', 'harvest_date_max', 'harvest_date_min', 'planned_duration', 'plant_zone', 'requires_seeding', 'slot']
+        fields = ['pk', 'created_at', 'date_planted',
+                  'date_seeded', 'harvest_date_max',
+                  'harvest_date_min', 'planned_duration',
+                  'plant_zone', 'requires_seeding', 'slot'
+                  ]
 
+
+class AaronsSuperSerializer(serializers.ModelSerializer):
+    pk = serializers.SerializerMethodField()
+    plant = serializers.SerializerMethodField()
+    plant_slot_id = serializers.SerializerMethodField()
+
+    def get_pk(self, instance):
+        return instance.plant_zone.id
+
+    def get_plant(self, instance):
+        return PlantSerializer(instance=instance.plant_zone.plant, many=False).data
+
+    def get_plant_slot_id(self, instance):
+        return instance.id
+
+    class Meta:
+        model = PlantSlot
+        fields = ['pk', 'plant', 'plant_slot_id']
+
+
+class ScheduleSerializer(serializers.ModelSerializer):
+    options = serializers.SerializerMethodField()
+
+    def get_options(self, instance):
+        return schedule(instance.plant_zone, instance.slot.user.id)
+
+    class Meta:
+        model = PlantSlot
+        fields = ['id', 'options']
