@@ -1,11 +1,13 @@
 from builtins import object
 from rest_framework import serializers
 from .models import Slot, Zone ,Plant ,PlantZone, PlantSlot
+from api.utils.seed_planner import schedule
 
 class PlantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plant
         fields = [
+            'pk',
             'common_name',
             'scientific_name',
             'sowing',
@@ -62,6 +64,7 @@ class FilteredPlantSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlantZone
         fields = [
+            'pk',
             'plant',
         ]
 
@@ -120,3 +123,46 @@ class CalendarSerializer(serializers.ModelSerializer):
         model = PlantSlot
         fields = ['id','created_at', 'date_planted', 'date_seeded', 'harvest_date_max', 'harvest_date_min', 'planned_duration', 'plant_zone', 'requires_seeding', 'slot']
 
+
+
+class AaronsSuperSerializer(serializers.ModelSerializer):
+    pk = serializers.SerializerMethodField()
+    plant = serializers.SerializerMethodField()
+    slot_id = serializers.SerializerMethodField()
+
+    def get_pk(self, instance):
+        return instance.plant_zone.id
+    
+    def get_plant(self, instance):
+        return PlantNameOnlySerializer(instance=instance.plant_zone.plant, many=False).data
+        
+    def get_slot_id(self, instance):
+        return instance.id
+
+    class Meta:
+        model = PlantSlot
+        fields = [
+            'pk',
+            'plant',
+            'slot_id'
+        ]
+
+'''
+        plant = PlantNameOnlySerializer()
+
+    class Meta:
+        model = PlantZone
+        fields = [
+            'pk',
+            'plant',
+        ]
+'''
+class MakeANewSerializer(serializers.ModelSerializer):
+    options = serializers.SerializerMethodField()
+
+    def get_options(self, instance):
+        return schedule(instance.plant_zone, instance.slot.user.id)
+    
+    class Meta:
+        model = PlantSlot
+        fields = ['id', 'options']

@@ -52,7 +52,7 @@ def placement(plant_obj, existing_plant_schedule):
     p_or_s = "S" if "S" in plant_obj.calendar else "P"
     proposed_date = timezone.now()
     month = (proposed_date.month - 1)
-    time_delta = timezone.timedelta(days=(plant_obj.harvest_max + (56 if "S" in p_or_s else 14)))
+    time_delta = timezone.timedelta(days=(plant_obj.plant.harvest_max + (56 if "S" in p_or_s else 14)))
     index = 0
     slot_not_found = True
     while slot_not_found and (index <= len(existing_plant_schedule)):

@@ -5,6 +5,8 @@ from api import serializers
 from django.shortcuts import get_list_or_404, get_object_or_404
 from django.contrib.auth import get_user_model
 from api.utils.queries import retrieve_a_users_plants
+from api.utils.seed_planner import schedule
+from django.http import JsonResponse
 
 User = get_user_model()
 
@@ -26,6 +28,7 @@ class PlantDetail(generics.RetrieveAPIView):
 
 
 class UserPlants(generics.ListCreateAPIView):
+    queryset = PlantSlot.objects.all()
     serializer_class = serializers.FilteredPlantSerializer
 
     def get(self, request):
@@ -43,15 +46,55 @@ class Calendar(generics.ListAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = get_object_or_404(User, pk=1)
+        user = get_object_or_404(User, pk=4)
         events = list(retrieve_a_users_plants(user.id))
         serializer = self.get_serializer(events, many=True)
         return Response(serializer.data)
 
 
-# class AddPlantToGarden(generics.ListCreateAPIView):
-#     queryset = Plant.objects.all()
-#     serializer_class = serializers.FilteredPlantSerializer
+# class AddPlant(generics.ListCreateAPIView):
+#     queryset = PlantSlot.objects.all()
+#     serializer_class = serializers.AaronsSuperSerializer
 
-#     def post(self, request):
-#         user = User.objects.get(pk=3)
+#     def post(self, request, user_id):
+#         user = User.objects.get(pk=user_id)
+#         plant_zone = PlantZone.objects.get(pk=63)
+#         new_plant_slot = PlantSlot.objects.create(plant_zone=plant_zone, slot= user.objects.first())
+#         new_plant_slot.save()
+#         serialized_data = self.get_serializer(new_plant_slot,many=False)
+#         return Response(serialized_data.data)
+
+        
+        # plants = [plant_slot.plant_zone for plant_slot in PlantSlot.objects.filter(slot__user=user)]
+
+class UpdatePlant(generics.RetrieveUpdateDestroyAPIView):
+    queryset = PlantSlot.objects.all()
+    serializer_class = serializers.FilteredPlantSerializer
+
+    def delete(self, request):
+        user = User.objects.get(pk=3)
+
+
+class DetermineSchedule(generics.RetrieveAPIView):
+    queryset = PlantSlot.objects.all()
+    serializer_class = serializers.MakeANewSerializer
+
+
+
+
+
+
+
+
+'''
+def determine_possible_schedule(request, plant_slot_id):
+    plant_slot_object = get_object_or_404(PlantSlot, pk=plant_slot_id)
+    possible_options = schedule(plant_slot_object.plant_zone, plant_slot_object.slot.user.id)
+    final_result = (plant_slot_id, possible_options)
+    serialized_data = MakeANewSerializer(final_result)
+    return JsonResponse(data=serialized_data, status=200)
+#retrieve plantSlot_Id abbreviated as PS from request
+        #call seedplaner with (PS.plant_zone, PS.slot.user.id)
+        #recieve sorted list by earliest planting time [(date, slot_object)] from above call to seedplaner
+        #return options as follows (current plant_slot_id, sorted_list)
+'''
