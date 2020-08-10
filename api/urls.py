@@ -7,7 +7,7 @@ urlpatterns = [
     path('myplants/', UserPlants.as_view()),
     path('calendarEvents/', Calendar.as_view()),
     path('scheduleplant/<int:pk>/', DetermineSchedule.as_view()),
-    path('addplant/<int:user_id>/', AddPlant.as_view()),
+    path('addplant/<int:user_id>/<int:plant_zone_id>/', AddPlant),
     # path('updateplant/', UpdatePlant.as_view()),
     # path('deleteplant/', )
 ]

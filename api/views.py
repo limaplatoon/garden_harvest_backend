@@ -6,7 +6,8 @@ from django.shortcuts import get_list_or_404, get_object_or_404
 from django.contrib.auth import get_user_model
 from api.utils.queries import retrieve_a_users_plants
 from api.utils.seed_planner import schedule
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
+from django.views.decorators.csrf import csrf_exempt
 
 User = get_user_model()
 
@@ -52,20 +53,17 @@ class Calendar(generics.ListAPIView):
         return Response(serializer.data)
 
 
-# class AddPlant(generics.ListCreateAPIView):
-#     queryset = PlantSlot.objects.all()
-#     serializer_class = serializers.AaronsSuperSerializer
+@csrf_exempt
+def AddPlant(request, user_id, plant_zone_id):  #item_create
+    if request.method == 'POST':
+        user = get_object_or_404(User, pk=user_id)
+        plant_zone = get_object_or_404(PlantZone, pk=plant_zone_id)
+        new_slot = user.slots.first()
+        new_plant_slot = PlantSlot.objects.create(plant_zone=plant_zone, slot=new_slot)
+        serialized_plant_slot = serializers.AaronsSuperSerializer(new_plant_slot, many=False).data
+        return JsonResponse(data=serialized_plant_slot, status=201)
+    return HttpResponseNotAllowed(['POST'])
 
-#     def post(self, request, user_id):
-#         user = User.objects.get(pk=user_id)
-#         plant_zone = PlantZone.objects.get(pk=63)
-#         new_plant_slot = PlantSlot.objects.create(plant_zone=plant_zone, slot= user.objects.first())
-#         new_plant_slot.save()
-#         serialized_data = self.get_serializer(new_plant_slot,many=False)
-#         return Response(serialized_data.data)
-
-        
-        # plants = [plant_slot.plant_zone for plant_slot in PlantSlot.objects.filter(slot__user=user)]
 
 class UpdatePlant(generics.RetrieveUpdateDestroyAPIView):
     queryset = PlantSlot.objects.all()
