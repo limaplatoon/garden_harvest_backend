@@ -1,7 +1,7 @@
 from .models import Zone, Plant, Slot, PlantZone, PlantSlot
 from api import serializers
 from api.utils.seed_planner import schedule
-from api.utils.queries import retrieve_a_users_plants,plants_that_can_be_seeded_this_month, plants_that_can_be_planted_this_month,current_status_of_all_user_plants
+from api.utils.queries import retrieve_a_users_plants,plants_that_can_be_seeded_this_month, plants_that_can_be_planted_this_month,current_status_of_all_user_plants, all_plants_that_could_be_grown_in_this_zone
 from rest_framework import generics
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
@@ -131,7 +131,7 @@ class DetermineSchedule(generics.RetrieveAPIView):
 def plant_something_new_this_month(request,):
     #edit next line once user auth is implemented
     user = get_object_or_404(User, pk=2)
-    zone = Zone.objects.get(users__id=user.id)
+    zone = get_object_or_404(Zone, users__id=user.id)
     can_be_seeded = plants_that_can_be_seeded_this_month(user.id, zone)
     can_be_planted = plants_that_can_be_planted_this_month(user.id, zone)
     serial_seeded = serializers.PlantZoneSerializer(can_be_seeded, many=True).data
@@ -145,7 +145,7 @@ class PlantSlotStatus(generics.ListAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = User.objects.get(pk=1)
+        user = get_object_or_404(User, pk=1)
         to_be_scheduled, to_be_seeded, to_be_transplanted, to_be_planted, to_be_harvested, harvested_plants = current_status_of_all_user_plants(user.id)
         scheduled = self.get_serializer(to_be_scheduled, many=True).data
         seeded = self.get_serializer(to_be_seeded, many=True).data
@@ -155,3 +155,15 @@ class PlantSlotStatus(generics.ListAPIView):
         history = self.get_serializer(harvested_plants, many=True).data
         result = {'to_be_scheduled': scheduled, 'to_be_seeded': seeded, 'to_be_transplanted': transplanted, 'to_be_planted': planted, 'to_be_harvested': harvested, 'harvested_plants': history}
         return Response(result)
+
+class WhatCanBeGrownInMyArea(generics.ListAPIView):
+    queryset = PlantZone.objects.all()
+    serializer_class = serializers.PlantZoneSerializer
+
+    def get(self, request):
+        # This will change once auth login is completed
+        user = get_object_or_404(User, pk=1)
+        zone = get_object_or_404(Zone, users__id=user.id)
+        possible_plants = all_plants_that_could_be_grown_in_this_zone(zone)
+        serialized_list = self.get_serializer(possible_plants, many=True).data
+        return Response(serialized_list)
