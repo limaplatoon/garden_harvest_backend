@@ -22,7 +22,7 @@ class ListAvailablePlants(generics.ListAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = User.objects.get(pk=1)
+        user = User.objects.get(pk=request.user.pk)
         plant_zones = user.zone.plants.exclude(calendar__contains=','*11)
         serializer = self.get_serializer(plant_zones, many=True)
         return Response(serializer.data)
@@ -39,7 +39,7 @@ class UserPlants(generics.ListCreateAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = User.objects.get(pk=4)
+        user = User.objects.get(pk=request.user.pk)
         plants = [plant_slot.plant_zone 
                   for plant_slot in PlantSlot.objects.filter(slot__user=user)]
         serializer = self.get_serializer(plants, many=True)
@@ -52,7 +52,7 @@ class Calendar(generics.ListAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = get_object_or_404(User, pk=1)
+        user = get_object_or_404(User, pk=request.user.pk)
         events = list(retrieve_a_users_plants(user.id).filter(date_harvested__isnull=True))
         serializer = self.get_serializer(events, many=True)
         return Response(serializer.data)
@@ -61,9 +61,9 @@ class Calendar(generics.ListAPIView):
 @api_view(('POST',))
 @renderer_classes((JSONRenderer, TemplateHTMLRenderer))
 @csrf_exempt
-def AddPlant(request, user_id, plant_zone_id):  #item_create
+def AddPlant(request, plant_zone_id):
     if request.method == 'POST':
-        user = get_object_or_404(User, pk=user_id)
+        user = get_object_or_404(User, pk=request.user.pk)
         plant_zone = get_object_or_404(PlantZone, pk=plant_zone_id)
         new_slot = user.slots.first()
         new_plant_slot = PlantSlot.objects.create(plant_zone=plant_zone, slot=new_slot)
@@ -128,9 +128,9 @@ class DetermineSchedule(generics.RetrieveAPIView):
 
 @api_view(('GET',))
 @renderer_classes((JSONRenderer, TemplateHTMLRenderer))
-def plant_something_new_this_month(request,):
+def plant_something_new_this_month(request):
     #edit next line once user auth is implemented
-    user = get_object_or_404(User, pk=2)
+    user = get_object_or_404(User, pk=request.user.pk)
     zone = get_object_or_404(Zone, users__id=user.id)
     can_be_seeded = plants_that_can_be_seeded_this_month(user.id, zone)
     can_be_planted = plants_that_can_be_planted_this_month(user.id, zone)
@@ -145,7 +145,7 @@ class PlantSlotStatus(generics.ListAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = get_object_or_404(User, pk=1)
+        user = get_object_or_404(User, pk=request.user.pk)
         to_be_scheduled, to_be_seeded, to_be_transplanted, to_be_planted, to_be_harvested, harvested_plants = current_status_of_all_user_plants(user.id)
         scheduled = self.get_serializer(to_be_scheduled, many=True).data
         seeded = self.get_serializer(to_be_seeded, many=True).data
@@ -162,7 +162,7 @@ class WhatCanBeGrownInMyArea(generics.ListAPIView):
 
     def get(self, request):
         # This will change once auth login is completed
-        user = get_object_or_404(User, pk=1)
+        user = get_object_or_404(User, pk=request.user.pk)
         zone = get_object_or_404(Zone, users__id=user.id)
         possible_plants = all_plants_that_could_be_grown_in_this_zone(zone)
         serialized_list = self.get_serializer(possible_plants, many=True).data

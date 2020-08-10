@@ -6,7 +6,7 @@ urlpatterns = [
     path('plants/<int:pk>/', PlantDetail.as_view()),
     path('myplants/', UserPlants.as_view()),
     path('calendarEvents/', Calendar.as_view()),
-    path('addplant/<int:user_id>/<int:plant_zone_id>/', AddPlant),
+    path('addplant/<int:plant_zone_id>/', AddPlant),
     path('scheduleplant/<int:pk>/', DetermineSchedule.as_view()),
     path('scheduleaccepted/<int:plant_slot_id>/', book_this_plant),
     path('updateplant/<int:plant_slot_id>/', UpdatePlant),
