@@ -61,12 +61,17 @@ class Calendar(generics.ListAPIView):
 @csrf_exempt
 def AddPlant(request, plant_zone_id):
     if request.method == 'POST':
-        user = get_object_or_404(User, pk=request.user.pk)
+        #user = get_object_or_404(User, pk=request.user.pk)
+        #serialized_plant_slot = serializers.AaronsSuperSerializer(new_event, many=False).data
+        #import pdb; pdb.set_trace()
+        data = request.data
         plant_zone = get_object_or_404(PlantZone, pk=plant_zone_id)
-        new_slot = user.slots.first()
-        new_plant_slot = PlantSlot.objects.create(plant_zone=plant_zone, slot=new_slot)
-        serialized_plant_slot = serializers.AaronsSuperSerializer(new_plant_slot, many=False).data
-        return JsonResponse(data=serialized_plant_slot, status=201)
+        new_slot = get_object_or_404(Slot,pk=data.get('slot_id'))
+        datetime_object = datetime.strptime(data.get('earliest_date'), '%Y-%m-%dT%H:%M:%S%z')
+        date_planned = datetime_object.date()
+        new_event = PlantSlot.objects.create(plant_zone=plant_zone, slot=new_slot, created_at=date_planned)
+        serialized_data = serializers.CalendarSerializer(new_event, many=False).data
+        return JsonResponse(data=serialized_data, status=201)
     return HttpResponseNotAllowed(['POST'])
 
 
@@ -76,7 +81,8 @@ def AddPlant(request, plant_zone_id):
 def book_this_plant(request, plant_slot_id):
     if request.method == 'POST':
         event = get_object_or_404(PlantSlot,pk=plant_slot_id)
-        data = json.loads(request.data)
+        #data = json.loads(request.data)
+        data = json.load(request.body)
         approved_slot_id = data.approved_slot_id
         xfer_slot = get_object_or_404(Slot,pk=approved_slot_id)
         event.slot = xfer_slot
