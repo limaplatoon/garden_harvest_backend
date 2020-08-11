@@ -81,3 +81,11 @@ def schedule(plant_obj, user_id):
         earliest_slot_times.append((result, {'slot': slot_details}))
     proposals = sorted(earliest_slot_times, key=lambda x: x[0])
     return proposals
+
+
+def schedule_by_slot(slot, plant_zone):
+    existing_plant_schedule = PlantSlot.objects.filter(
+        slot__id=slot.id
+    ).exclude(date_harvested__isnull=False).order_by('created_at')
+    result = placement(plant_zone, existing_plant_schedule)
+    return result

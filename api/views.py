@@ -169,3 +169,20 @@ class WhatCanBeGrownInMyArea(generics.ListAPIView):
 class Encyclopedia(generics.ListAPIView):
     queryset = Plant.objects.all()
     serializer_class = serializers.PlantSerializer
+
+
+class SlotOptions(generics.RetrieveAPIView):
+    serializer_class = serializers.SlotOptionsSerializer
+
+    def get_serializer_context(self):
+        pk = self.kwargs.get('plant_zone_id')
+        plant_zone = PlantZone.objects.get(pk=pk)
+        return {'plant_zone': plant_zone}
+    
+    def get_queryset(self):
+        return self.request.user.slots.all().prefetch_related('plant')
+    
+    def get(self, request, plant_zone_id):
+        slots = self.get_queryset()
+        serializer = self.get_serializer(slots, many=True)
+        return Response(serializer.data)
