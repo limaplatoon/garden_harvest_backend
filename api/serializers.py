@@ -93,10 +93,14 @@ class AaronsSuperSerializer(serializers.ModelSerializer):
 
 class ScheduleSerializer(serializers.ModelSerializer):
     options = serializers.SerializerMethodField()
+    plant = serializers.SerializerMethodField()
 
     def get_options(self, instance):
         return schedule(instance.plant_zone, instance.slot.user.id)
 
+    def get_plant(self, instance):
+        return PlantSerializer(instance.plant_zone.plant, many=False).data
+
     class Meta:
         model = PlantSlot
-        fields = ['id', 'options']
+        fields = ['id', 'plant', 'options']
