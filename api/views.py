@@ -169,6 +169,11 @@ class WhatCanBeGrownInMyArea(generics.ListAPIView):
         return Response(serialized_list)
 
 
+class Encyclopedia(generics.ListAPIView):
+    queryset = Plant.objects.all()
+    serializer_class = serializers.PlantSerializer
+
+
 class SlotOptions(generics.RetrieveAPIView):
     serializer_class = serializers.SlotOptionsSerializer
 
