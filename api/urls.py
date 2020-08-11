@@ -17,7 +17,7 @@ urlpatterns = [
     path('newActivities/', plant_something_new_this_month),
     path('allPlantStatus/', PlantSlotStatus.as_view()),
     path('whatCanBeGrown/', WhatCanBeGrownInMyArea.as_view()),
-    path('encyclopedia/', Encyclopedia)
+    path('encyclopedia/', Encyclopedia.as_view())
     ]
 
     # path('addplant/', UserPlants.as_view()),
