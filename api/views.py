@@ -167,3 +167,20 @@ class WhatCanBeGrownInMyArea(generics.ListAPIView):
         possible_plants = all_plants_that_could_be_grown_in_this_zone(zone)
         serialized_list = self.get_serializer(possible_plants, many=True).data
         return Response(serialized_list)
+
+
+class SlotOptions(generics.RetrieveAPIView):
+    serializer_class = serializers.SlotOptionsSerializer
+
+    def get_serializer_context(self):
+        pk = self.kwargs.get('plant_zone_id')
+        plant_zone = PlantZone.objects.get(pk=pk)
+        return {'plant_zone': plant_zone}
+    
+    def get_queryset(self):
+        return self.request.user.slots.all().prefetch_related('plant')
+    
+    def get(self, request, plant_zone_id):
+        slots = self.get_queryset()
+        serializer = self.get_serializer(slots, many=True)
+        return Response(serializer.data)
