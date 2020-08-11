@@ -161,7 +161,7 @@ class WhatCanBeGrownInMyArea(generics.ListAPIView):
     def get(self, request):
         user = get_object_or_404(User, pk=request.user.pk)
         zone = get_object_or_404(Zone, users__id=user.id)
-        possible_plants = all_plants_that_could_be_grown_in_this_zone(zone)
+        possible_plants = zone.all_plants_that_could_be_grown_in_this_zone()
         serialized_list = self.get_serializer(possible_plants, many=True).data
         return Response(serialized_list)
 
