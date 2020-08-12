@@ -111,14 +111,14 @@ def UpdatePlant(request,plant_slot_id):
     return HttpResponseNotAllowed(['POST'])
 
 
-@api_view(('POST',))
+@api_view(('DELETE',))
 @renderer_classes((JSONRenderer, TemplateHTMLRenderer))
 @csrf_exempt
-def DeletePlant(request,plant_slot_id):
-    if request.method == 'POST':
-        event = get_object_or_404(PlantSlot, pk=plant_slot_id)
-        event.delete()
-        return JsonResponse(data={'status':'success'}, status=200)
+def DeletePlant(request, plant_slot_id):
+    if request.method == 'DELETE':
+        plant_slot = get_object_or_404(PlantSlot, pk=plant_slot_id)
+        plant_slot.delete()
+        return JsonResponse({}, status=203)
     return HttpResponseNotAllowed(['POST'])
 
 class DetermineSchedule(generics.RetrieveAPIView):
