@@ -30,11 +30,8 @@ def depends_on_season(proposed_date, month, plant_obj, p_or_s):
     year= proposed_date.year
     calendar = plant_obj.calendar.split(',')
     adj_calendar = calendar[month:] + calendar[:month]
-    adj_month = adj_calendar.index(p_or_s)
-    if adj_month > 0:
-        planned_date = timezone.make_aware(timezone.datetime((year + (month + adj_month)//12),((month + adj_month)%12),1,0,0,0,0))
-    else:
-        planned_date = timezone.make_aware(datetime.combine(proposed_date,datetime.min.time()))
+    adj_month = adj_calendar.index(p_or_s) + 1
+    planned_date = timezone.make_aware(timezone.datetime((year + (month + adj_month)//12),((month + adj_month)%12),1,0,0,0,0))
     return planned_date
 
 def retrieve_event_information(event):
