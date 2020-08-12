@@ -63,7 +63,7 @@ def AddPlant(request, plant_zone_id):
         plant_zone = get_object_or_404(PlantZone, pk=plant_zone_id)
         new_slot = user.slots.first()
         new_plant_slot = PlantSlot.objects.create(plant_zone=plant_zone, slot=new_slot)
-        serialized_plant_slot = serializers.AaronsSuperSerializer(new_plant_slot, many=False).data
+        serialized_plant_slot = serializers.FinalCustomSerializer(new_plant_slot, many=False).data
         return JsonResponse(data=serialized_plant_slot, status=201)
     return HttpResponseNotAllowed(['POST'])
 
