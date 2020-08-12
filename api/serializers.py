@@ -72,13 +72,18 @@ class CalendarSerializer(serializers.ModelSerializer):
                   ]
 
 
-class AaronsSuperSerializer(serializers.ModelSerializer):
+class FinalCustomSerializer(serializers.ModelSerializer):
     pk = serializers.SerializerMethodField()
+    calendar = serializers.SerializerMethodField()
     plant = serializers.SerializerMethodField()
     plant_slot_id = serializers.SerializerMethodField()
+    zone = serializers.SerializerMethodField()
 
     def get_pk(self, instance):
         return instance.plant_zone.id
+
+    def get_calendar(self, instance):
+        return instance.plant_zone.calendar
 
     def get_plant(self, instance):
         return PlantSerializer(instance=instance.plant_zone.plant, many=False).data
@@ -86,9 +91,12 @@ class AaronsSuperSerializer(serializers.ModelSerializer):
     def get_plant_slot_id(self, instance):
         return instance.id
 
+    def get_zone(self, instance):
+        return ZoneSerializer(instance=instance.plant_zone.zone, many=False).data
+
     class Meta:
         model = PlantSlot
-        fields = ['pk', 'plant', 'plant_slot_id']
+        fields = ['pk', 'calendar', 'plant', 'plant_slot_id', 'zone']
 
 
 class ScheduleSerializer(serializers.ModelSerializer):
