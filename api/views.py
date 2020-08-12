@@ -67,7 +67,10 @@ def AddPlant(request, plant_zone_id):
         return JsonResponse(data=serialized_plant_slot, status=201)
     return HttpResponseNotAllowed(['POST'])
 
-
+'''
+temporarily forgot that this step was skipped and is technically never called
+it should have contained some of the steps in the above function but that was modified when
+merging 2 steps together...
 @api_view(('POST',))
 @renderer_classes((JSONRenderer, TemplateHTMLRenderer))
 @csrf_exempt
@@ -83,7 +86,7 @@ def book_this_plant(request, plant_slot_id):
         serialized_data = serializers.CalendarSerializer(event, many=False).data
         return Response(serialized_data)
     return HttpResponseNotAllowed(['POST'])
-
+'''
 
 @api_view(('POST',))
 @renderer_classes((JSONRenderer, TemplateHTMLRenderer))
